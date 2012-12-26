@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -8,6 +7,8 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path');
+
+var ArticleProvider = require('./articleprovider-memory').ArticleProvider;
 
 var app = express();
 
@@ -28,7 +29,17 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.get('/', routes.index);
+app.configure('production', function(){
+  app.use(express.errorHandler());
+});
+
+var articleProvider= new ArticleProvider();
+
+app.get('/', function(req, res){
+  articleProvider.findAll(function(error, docs){
+      res.send(docs);
+  });
+});
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){
