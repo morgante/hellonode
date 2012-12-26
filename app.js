@@ -8,7 +8,7 @@ var express = require('express')
   , http = require('http')
   , path = require('path');
 
-var ArticleProvider = require('./articleprovider-memory').ArticleProvider;
+var ArticleProvider = require('./articleprovider-mongo').ArticleProvider;
 
 var app = express();
 
@@ -33,7 +33,7 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
-var articleProvider= new ArticleProvider();
+var articleProvider = new ArticleProvider('localhost', 27017);
 
 app.get('/', function(req, res){
   articleProvider.findAll(function(error, docs){
