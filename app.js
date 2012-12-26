@@ -7,8 +7,9 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path');
+var mongo = require('mongodb');
 
-var ArticleProvider = require('./articleprovider-memory').ArticleProvider;
+var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/test'; 
 
 var app = express();
 
@@ -33,31 +34,15 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
-var articleProvider= new ArticleProvider();
+mongo.Db.connect(mongoUri, function (err, db) {
+	db.collection('mydocs', function(er, collection) {
+		collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {	
+		});
+	});
+});
 
 app.get('/', function(req, res){
-  articleProvider.findAll(function(error, docs){
-		res.render("index", {
-			title: "Blog",
-			articles:docs
-		});
-  });
-});
-app.get('/users', user.list);
-
-app.get('/blog/new', function(req, res) {
-    res.render('blog_new.jade', {
-        title: 'New Post'
-    });
-});
-
-app.post('/blog/new', function(req, res){
-    articleProvider.save({
-        title: req.param('title'),
-        body: req.param('body')
-    }, function( error, docs) {
-        res.redirect('/')
-    });
+	res.end( 'bob' );
 });
 
 http.createServer(app).listen(app.get('port'), function(){
