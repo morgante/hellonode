@@ -4,17 +4,26 @@ var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectID;
 
-ArticleProvider = function(host, port) {
-  this.db= new Db('node-mongo-blog', new Server(host, port, {auto_reconnect: true}, {}));
-  this.db.open(function(){});
+var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/test'; 
+
+var theDatabase = null;
+
+ArticleProvider = function() {
+	// console.log( require('mongodb').Db );
+	Db.connect(mongoUri, function (err, db) {		
+		theDatabase = db;
+				
+		return db;
+	});
+		
 };
 
 
-ArticleProvider.prototype.getCollection= function(callback) {
-  this.db.collection('articles', function(error, article_collection) {
-    if( error ) callback(error);
-    else callback(null, article_collection);
-  });
+ArticleProvider.prototype.getCollection= function(callback) {	
+	theDatabase.collection('articles', function(error, article_collection) {
+		if( error ) callback(error);
+		else callback(null, article_collection);
+	});
 };
 
 ArticleProvider.prototype.findAll = function(callback) {
